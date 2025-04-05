@@ -15,16 +15,17 @@ public with sharing class NewsCategoryTriggerHandler {
         
         List<News_Category__c> categoriesToSync = new List<News_Category__c>();
         List<String> categoryNames = new List<String>();
+        Map<String, Id> categoryNameToIdMap = new Map<String, Id>();
         
         for(News_Category__c category : newRecords) {
             if(category.Sync__c) {
-                categoriesToSync.add(category);
-                categoryNames.add(category.Name);
+                categoryNameToIdMap.put(category.name, category.Id);
+                //categoryNames.add(category.Name);
             } 
         }
         
-            if(categoriesToSync.size() > 0) {
-                syncCategoriesWithFuture(categoryNames);
+            if(categoryNameToIdMap.keySet().size() > 0) {
+                syncCategoriesWithFuture(categoryNameToIdMap);
         }
     }
 
@@ -58,7 +59,7 @@ public with sharing class NewsCategoryTriggerHandler {
      * @param categoryNames List of category names to sync
      */
     @future(callout=true)
-    public static void syncCategoriesWithFuture(List<String> categoryNames) {
+    public static void syncCategoriesWithFuture(Map<String, Id> categoryNameToIdMap) {
         // TODO: Implement future method
         // - Get categories by name
         // - Make callouts to NewsAPI for each category
@@ -67,7 +68,7 @@ public with sharing class NewsCategoryTriggerHandler {
         List<Article__c> articlesToInsert = new List<Article__c>();
         List<News_Category__c> categoriesToUpdate = new List<News_Category__c>();
         
-        for(String categoryName : categoryNames) {
+        for(String categoryName : categoryNameToIdMap.keySet()) {
             NewsAPIResponse response = NewsAPIService.getTopHeadlinesByCategory(categoryName, 20, 10);
             if(response != null && response.articles != null) {
             List<Article__c> articles = response.toSObjects();
