@@ -51,9 +51,11 @@ public class NewsCategoryQueueable implements Queueable, Database.AllowsCallouts
         NewsAPIResponse response = NewsAPIService.getTopHeadlinesByCategory(categoryName, 10, currentPage);
         
         // Check if the API response is valid and contains articles
-        if (response == null || response.articles == null || response.articles.isEmpty()) {
+        if (response != null || !response.articles.isEmpty()) {
             List<Article__c> articles = response.toSObjects(categoryId, categoryName);
             System.debug('No articles found for category: ' + categoryName);
+            insert articles; // Save articles to Salesforce
+            System.debug('Inserted ' + articles.size() + ' articles.');
             // return; // Exit if no articles found
         }
 
@@ -63,11 +65,6 @@ public class NewsCategoryQueueable implements Queueable, Database.AllowsCallouts
         //     articles.add(article.toSObject()); // Convert to Salesforce Article__c
         // }
         
-        if (!articles.isEmpty()) {
-            insert articles; // Save articles to Salesforce
-            System.debug('Inserted ' + articles.size() + ' articles.');
-        }
-
         // Step 3: Update category with last synced date if it's the last page
         if (currentPage >= pages) { // If we're on the last page
             try {
