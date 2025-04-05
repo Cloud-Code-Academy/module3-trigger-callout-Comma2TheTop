@@ -12,7 +12,22 @@ public with sharing class NewsCategoryTriggerHandler {
         // TODO: Implement insert handler
         // - Filter categories that need to be synced
         // - Call future method for callouts
+        
+        List<News_Category__c> categoriesToSync = new List<News_Category__c>();
+        List<String> categoryNames = new List<String>();
+        
+        for(News_Category__c category : newRecords) {
+            if(category.Sync__c) {
+                categoriesToSync.add(category);
+                categoryNames.add(category.Name);
+            } 
+        }
+        
+            if(categoriesToSync.size() > 0) {
+                syncCategoriesWithFuture(categoryNames);
+        }
     }
+
     
     /**
      * Handles after update events for News_Category__c
@@ -24,8 +39,19 @@ public with sharing class NewsCategoryTriggerHandler {
         // TODO: Implement update handler
         // - Filter categories that need to be synced
         // - Call queueable method for callouts
+        List<News_Category__c> categoriesToSyncUpdate = new List<News_Category__c>();
+        
+        for(News_Category__c category : newRecords) {
+            News_Category__c oldCategory = oldMap.get(category.Id);
+            if(category.Sync__c && !oldCategory.Sync__c) {
+                categoriesToSyncUpdate.add(category);
+            }   
+        }
+
+        if(categoriesToSyncUpdate.size() > 0) {
+            syncCategoriesWithQueueable(categoriesToSyncUpdate);         
     }
-    
+}
     /**
      * Future method to sync categories using the NewsAPI
      * Used for insert operations
@@ -38,8 +64,27 @@ public with sharing class NewsCategoryTriggerHandler {
         // - Make callouts to NewsAPI for each category
         // - Insert retrieved articles
         // - Update categories with last synced date
+        List<Article__c> articlesToInsert = new List<Article__c>();
+        List<News_Category__c> categoriesToUpdate = new List<News_Category__c>();
+        
+        for(String categoryName : categoryNames) {
+            NewsAPIResponse response = NewsAPIService.getTopHeadlinesByCategory(categoryName, 20, 10);
+            if(response != null && response.articles != null) {
+            List<Article__c> articles = response.toSObjects();
+            
+            if (articles != null && !articles.isEmpty()) {
+                articlesToInsert.addAll(articles);
+            }
+        }
+                
+                News_Category__c categoryToUpdate = new News_Category__c();
+                categoryToUpdate.Name = categoryName;
+                categoryToUpdate.Last_Synced__c = System.now();  // Set the current date/time
+                categoriesToUpdate.add(categoryToUpdate);
     }
-    
+    if(!articlesToInsert.isEmpty()){
+        insert articlesToInsert;
+    }   }
     /**
      * Queueable method to sync categories using the NewsAPI
      * Used for update operations
@@ -49,6 +94,10 @@ public with sharing class NewsCategoryTriggerHandler {
         // TODO: Implement queueable job enqueuing
         // - Determine pages to sync for each category
         // - Create and enqueue NewsCategoryQueueable job for each category
+        for(News_Category__c category : categoriesToSync) {
+            if(String.isNotBlank(category.Name)){
+                System.enqueueJob(new NewsCategoryQueueable(category.Id, category.Name, 20, 2));
+            }
+        }
     }
-    
 } 
