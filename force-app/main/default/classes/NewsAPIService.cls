@@ -5,7 +5,8 @@ public with sharing class NewsAPIService {
     // TODO: Define API endpoint constants
     private static final String API_NAMED_CREDENTIAL = 'callout:NewsAPI'; //https://newsapi.org
     private static final String API_ENDPOINT = '/v2/top-headlines';
-    
+    //key = 'd97e81a3ebf54e448b168bc117b297a7'
+
     // TODO: Define default parameters
     private static final Integer DEFAULT_PAGE_SIZE = 20; 
     
@@ -23,7 +24,11 @@ public with sharing class NewsAPIService {
         // - Make the callout
         // - Parse and return the response
         
-        return null;
+        //req.setEndpoint('callout:'+API_NAMED_CREDENTIAL+API_ENDPOINT+'?country=us&category='+category);
+        String endpoint = API_NAMED_CREDENTIAL+API_ENDPOINT+'?country=us&category='+category+'&pageSize='+pageSize+'&page='+page;
+
+        HttpResponse response = makeCallout(endpoint);
+        return parseResponse(response.getBody());
     }
     
     /**
@@ -31,13 +36,20 @@ public with sharing class NewsAPIService {
      * @param endpoint The full URL with parameters
      * @return HttpResponse The HTTP response
      */
-    private static HttpResponse makeCallout(String endpoint) {
+    public static HttpResponse makeCallout(String endpoint) {
         // TODO: Implement HTTP callout
         // - Create and configure HTTP request
         // - Make the callout
         // - Handle exceptions
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        req.setTimeout(120000);
+
         
-        return null;
+        Http http = new Http();
+        HttpResponse res = http.send(req);
+        return res;
     }
     
     /**
@@ -49,8 +61,20 @@ public with sharing class NewsAPIService {
         // TODO: Implement JSON parsing
         // - Deserialize JSON to NewsAPIResponse
         // - Handle exceptions
-        
-        return null;
+        if(String.isEmpty(jsonResponse)){
+            throw new NewsAPIException('No response received');
+        }
+        try{
+        NewsAPIResponse responseForWrapper = (NewsAPIResponse) System.JSON.deserialize(jsonResponse, NewsAPIResponse.class);
+        if(responseForWrapper == null) {
+            throw new NewsAPIException('No response received');
+        }
+        return responseForWrapper;
+        } catch (Exception e) {
+            System.debug('Exception caught while parsing JSON response: ' + e.getMessage());
+            throw new NewsAPIException('Error parsing response');
+        }
+        //return null;
     }
     
     /**
