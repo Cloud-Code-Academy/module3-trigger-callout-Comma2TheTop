@@ -52,15 +52,16 @@ public class NewsCategoryQueueable implements Queueable, Database.AllowsCallouts
         
         // Check if the API response is valid and contains articles
         if (response == null || response.articles == null || response.articles.isEmpty()) {
+            List<Article__c> articles = response.toSObjects(categoryId, categoryName);
             System.debug('No articles found for category: ' + categoryName);
-            return; // Exit if no articles found
+            // return; // Exit if no articles found
         }
 
         // Step 2: Process and save articles
-        List<Article__c> articles = new List<Article__c>();
-        for (NewsAPIResponse.Article article : response.articles) {
-            articles.add(article.toSObject()); // Convert to Salesforce Article__c
-        }
+        // List<Article__c> articles = new List<Article__c>();
+        // for (NewsAPIResponse.Article article : response.articles) {
+        //     articles.add(article.toSObject()); // Convert to Salesforce Article__c
+        // }
         
         if (!articles.isEmpty()) {
             insert articles; // Save articles to Salesforce

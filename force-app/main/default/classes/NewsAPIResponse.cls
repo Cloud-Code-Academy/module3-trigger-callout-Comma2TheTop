@@ -25,7 +25,7 @@ public class NewsAPIResponse {
          * Converts the API article to a Salesforce Article__c record
          * @return Article__c The Salesforce record
          */
-        public Article__c toSObject() {
+        public Article__c toSObject(String categoryId, String categoryName) {
             // TODO: Implement conversion from API article to Salesforce record
             // Consider:
             // - Handling date conversion
@@ -43,6 +43,8 @@ public class NewsAPIResponse {
                 newArticle.Source__c = source.name;
                 Datetime dt = Datetime.valueOf(publishedAt.replace('Z', ''));
                 newArticle.Published_At__c = dt;
+                newArticle.News_Category__c = categoryId;
+                newArticle.Category__c = categoryName;
 
                 return newArticle;
 
@@ -62,12 +64,12 @@ public class NewsAPIResponse {
      * Helper method to convert all articles in this response to Salesforce records
      * @return List<Article__c> List of Salesforce records
      */
-    public List<Article__c> toSObjects() {
+    public List<Article__c> toSObjects(String categoryId, String categoryName) {
         // TODO: Implement conversion of all articles to Salesforce records
         List<Article__c> records = new List<Article__c>();
         if(articles != null) {
             for(Article currentArticle : articles){
-                records.add(currentArticle.toSObject());
+                records.add(currentArticle.toSObject(categoryId, categoryName));
             }
         }
         return records;

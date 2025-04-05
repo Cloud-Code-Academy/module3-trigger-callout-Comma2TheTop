@@ -71,7 +71,7 @@ public with sharing class NewsCategoryTriggerHandler {
         for(String categoryName : categoryNameToIdMap.keySet()) {
             NewsAPIResponse response = NewsAPIService.getTopHeadlinesByCategory(categoryName, 20, 10);
             if(response != null && response.articles != null) {
-            List<Article__c> articles = response.toSObjects();
+            List<Article__c> articles = response.toSObjects(categoryNameToIdMap.get(categoryName), categoryName);
             
             if (articles != null && !articles.isEmpty()) {
                 articlesToInsert.addAll(articles);
