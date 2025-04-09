@@ -38,10 +38,11 @@ public class NewsAPIResponse {
                 newArticle.Author__c = author;
                 newArticle.Description__c = description;
                 newArticle.URL__c = url != null && url.length() > 255 ? url.substring(0, 255) : url;
-                newArticle.urlToImage__c = urlToImage;
+                newArticle.urlToImage__c = urlToImage != null ? urlToImage.substring(0, Math.min(255, urlToImage.length())) : null;
+                //record.urlToImage__c = urlToImage != null ? urlToImage.substring(0, Math.min(255, urlToImage.length())) : null;
                 newArticle.Content__c = content;
                 newArticle.Source__c = source.name;
-                Datetime dt = Datetime.valueOf(publishedAt.replace('Z', ''));
+                Datetime dt = Datetime.valueOfGmt(publishedAt.replace('T', ' ').replace('Z', ''));
                 newArticle.Published_At__c = dt;
                 newArticle.News_Category__c = categoryId;
                 newArticle.Category__c = categoryName;

@@ -1,3 +1,6 @@
-HttpResponse res = NewsAPIService.makeCallout('callout:NewsAPI/v2/top-headlines?country=us&category=technology&pageSize=10&page=1');
-System.debug('Response Body: ' + res.getBody());
+// Replace with your actual method call
+NewsAPIResponse response = NewsAPIService.getTopHeadlinesByCategory('technology', 10, 1);
+
+// Optionally log something from the response
+System.debug(response);
 

@@ -25,7 +25,7 @@ public with sharing class NewsAPIService {
         // - Parse and return the response
         
         //req.setEndpoint('callout:'+API_NAMED_CREDENTIAL+API_ENDPOINT+'?country=us&category='+category);
-        String endpoint = API_NAMED_CREDENTIAL+API_ENDPOINT+'?country=us&category='+category+'&pageSize='+pageSize+'&page='+page;
+        String endpoint = API_NAMED_CREDENTIAL+API_ENDPOINT+'?category='+category+'&pageSize='+pageSize+'&page='+page;
 
         HttpResponse response = makeCallout(endpoint);
         return parseResponse(response.getBody());
