@@ -12,19 +12,43 @@ public class NewsAPIResponse {
      */
     public class Article {
         // TODO: Define article fields
+        public Source source {get; set; }
+        public String author {get; set; }
+        public String title {get; set; }
+        public String description {get; set; }
+        public String url {get; set;}
+        public String urlToImage {get; set; }
+        public String publishedAt {get; set; }
+        public String content {get; set; }
         
         /**
          * Converts the API article to a Salesforce Article__c record
          * @return Article__c The Salesforce record
          */
-        public Article__c toSObject() {
+        public Article__c toSObject(String categoryId, String categoryName) {
             // TODO: Implement conversion from API article to Salesforce record
             // Consider:
             // - Handling date conversion
             // - Generating a unique record name
             // - Handling field length limits
-            
-            return null;
+            // String formattedDate = publishedAt.replace('T', '').replace('Z', '');
+            // Datetime convertedDateTime = Datetime.valueOfGmt(formattedDate);
+            Article__c newArticle = new Article__c();
+                newArticle.Title__c = title;
+                newArticle.Author__c = author;
+                newArticle.Description__c = description;
+                newArticle.URL__c = url != null && url.length() > 255 ? url.substring(0, 255) : url;
+                newArticle.urlToImage__c = urlToImage != null ? urlToImage.substring(0, Math.min(255, urlToImage.length())) : null;
+                //record.urlToImage__c = urlToImage != null ? urlToImage.substring(0, Math.min(255, urlToImage.length())) : null;
+                newArticle.Content__c = content;
+                newArticle.Source__c = source.name;
+                Datetime dt = Datetime.valueOfGmt(publishedAt.replace('T', ' ').replace('Z', ''));
+                newArticle.Published_At__c = dt;
+                newArticle.News_Category__c = categoryId;
+                newArticle.Category__c = categoryName;
+
+                return newArticle;
+
         }
     }
     
@@ -33,14 +57,22 @@ public class NewsAPIResponse {
      */
     public class Source {
         // TODO: Define source fields
+        public String id {get; set; }
+        public String name {get; set; }
     }
     
     /**
      * Helper method to convert all articles in this response to Salesforce records
      * @return List<Article__c> List of Salesforce records
      */
-    public List<Article__c> toSObjects() {
+    public List<Article__c> toSObjects(String categoryId, String categoryName) {
         // TODO: Implement conversion of all articles to Salesforce records
-        return null;
+        List<Article__c> records = new List<Article__c>();
+        if(articles != null) {
+            for(Article currentArticle : articles){
+                records.add(currentArticle.toSObject(categoryId, categoryName));
+            }
+        }
+        return records;
     }
 } 

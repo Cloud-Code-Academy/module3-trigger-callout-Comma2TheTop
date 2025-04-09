@@ -25,7 +25,7 @@ private class NewsCategoryTriggerTest {
         Test.setMock(HttpCalloutMock.class, NewsAPIMock.createSuccessMock());
         
         Test.startTest();
-        
+        TestUtils.bypassTestCheck = true;
         // Create a new category with Sync__c = true
         News_Category__c newCategory = new News_Category__c(
             Name = 'Science',
@@ -42,7 +42,9 @@ private class NewsCategoryTriggerTest {
             FROM News_Category__c 
             WHERE Id = :newCategory.Id
         ];
+        
         Assert.isNotNull(updatedCategory.Last_Synced__c, 'Last_Synced__c should be set');
+        
         Assert.areEqual(false, updatedCategory.Sync__c, 'Sync__c should be set to false');
         
         // Verify articles were created
